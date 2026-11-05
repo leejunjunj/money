@@ -145,7 +145,7 @@
       <section class="space-y-3">
         <div class="flex justify-between items-center px-1">
           <h3 class="text-sm font-bold text-slate-700 flex items-center gap-1.5">
-            <i class="fa-solid fa-layer-group text-pink-500"></i> 내역 타임라인
+            <i class="fa-solid fa-layer-group text-pink-500"></i> 내역 타임라인 (클릭시 수정)
           </h3>
           <span class="text-xs text-pink-400">좌: 수입 | 우: 지출</span>
         </div>
@@ -280,7 +280,7 @@
         </div>
 
         <div>
-          <label class="text-xs font-bold text-slate-500 block mb-1">금액</label>
+          <label class="text-xs font-bold text-slate-500 block mb-1">금액 (쉼표 자동 적용)</label>
           <div class="relative">
             <input type="text" id="txAmount" readonly placeholder="0" class="w-full border border-pink-200 rounded-xl px-3 py-2.5 text-right font-black text-lg text-slate-800 bg-pink-50/30 focus:outline-none">
           </div>
@@ -370,7 +370,7 @@
   </div>
 
   <script>
-    // --- STATE MANAGEMENT (0원 및 빈 내역에서 시작) ---
+    // --- STATE MANAGEMENT ---
     let state = {
       apiKey: 'Ab8RN6IIC9fJyvtmE3x2CI2bA7maOQSYyjtou1CWt-CxHVupxw',
       budget: 2000000,
@@ -393,6 +393,7 @@
     };
 
     let calcExpression = '';
+    let editingTxId = null; // 수정 중인 내역 ID
     let trendChartInstance = null;
     let pieChartInstance = null;
 
@@ -405,14 +406,14 @@
     });
 
     function loadLocalStorage() {
-      const saved = localStorage.getItem('pink_budget_data_v3');
+      const saved = localStorage.getItem('pink_budget_data_v4');
       if (saved) {
         try { state = { ...state, ...JSON.parse(saved) }; } catch(e){}
       }
     }
 
     function saveLocalStorage() {
-      localStorage.setItem('pink_budget_data_v3', JSON.stringify(state));
+      localStorage.setItem('pink_budget_data_v4', JSON.stringify(state));
     }
 
     function renderAll() {
@@ -514,7 +515,7 @@
       }
     }
 
-    // --- 3. DUAL-COLUMN STACK TIMELINE ---
+    // --- 3. DUAL-COLUMN STACK TIMELINE (클릭하여 수정 가능) ---
     function renderStackTimeline() {
       const container = document.getElementById('stackTimeline');
       container.innerHTML = '';
@@ -557,10 +558,10 @@
 
         incomes.forEach(t => {
           html += `
-            <div class="bg-emerald-50/80 border border-emerald-100 rounded-xl p-2 relative group">
+            <div onclick="openEditTransactionModal('${t.id}')" class="bg-emerald-50/80 border border-emerald-100 rounded-xl p-2 relative group cursor-pointer hover:bg-emerald-100/60 transition-colors">
               <div class="flex justify-between items-start">
                 <span class="text-[10px] font-bold text-emerald-600 bg-emerald-100 px-1.5 py-0.5 rounded-md">${t.category}</span>
-                <button onclick="deleteTx('${t.id}')" class="text-slate-300 hover:text-rose-500 text-xs"><i class="fa-solid fa-xmark"></i></button>
+                <button onclick="event.stopPropagation(); deleteTx('${t.id}')" class="text-slate-300 hover:text-rose-500 text-xs p-1"><i class="fa-solid fa-xmark"></i></button>
               </div>
               <div class="font-bold text-slate-700 mt-1 truncate">${t.title}</div>
               <div class="font-black text-emerald-600 text-right mt-0.5 truncate">+₩${Number(t.amount).toLocaleString()}</div>
@@ -572,10 +573,10 @@
 
         expenses.forEach(t => {
           html += `
-            <div class="bg-rose-50/80 border border-rose-100 rounded-xl p-2 relative group">
+            <div onclick="openEditTransactionModal('${t.id}')" class="bg-rose-50/80 border border-rose-100 rounded-xl p-2 relative group cursor-pointer hover:bg-rose-100/60 transition-colors">
               <div class="flex justify-between items-start">
                 <span class="text-[10px] font-bold text-rose-600 bg-rose-100 px-1.5 py-0.5 rounded-md">${t.category}</span>
-                <button onclick="deleteTx('${t.id}')" class="text-slate-300 hover:text-rose-500 text-xs"><i class="fa-solid fa-xmark"></i></button>
+                <button onclick="event.stopPropagation(); deleteTx('${t.id}')" class="text-slate-300 hover:text-rose-500 text-xs p-1"><i class="fa-solid fa-xmark"></i></button>
               </div>
               <div class="font-bold text-slate-700 mt-1 truncate">${t.title}</div>
               <div class="font-black text-rose-600 text-right mt-0.5 truncate">-₩${Number(t.amount).toLocaleString()}</div>
@@ -740,7 +741,7 @@
       }, { passive: true });
     }
 
-    // --- 7. MODAL & INPUT & CALCULATOR KEYPAD ---
+    // --- 7. MODAL & INPUT & CALCULATOR KEYPAD (쉼표 자동 적용) ---
     function openModal(id) {
       document.getElementById(id).classList.remove('hidden');
       if (id === 'accountModal') renderAccountManageList();
@@ -752,6 +753,7 @@
     }
 
     function openTransactionModal(type) {
+      editingTxId = null;
       document.getElementById('txType').value = type;
       document.getElementById('modalTitle').innerText = type === 'income' ? '수입 내역 작성' : '지출 내역 작성';
       
@@ -777,6 +779,46 @@
       openModal('transactionModal');
     }
 
+    function openEditTransactionModal(id) {
+      const tx = state.transactions.find(t => t.id === id);
+      if (!tx) return;
+
+      editingTxId = tx.id;
+      document.getElementById('txType').value = tx.type;
+      document.getElementById('modalTitle').innerText = tx.type === 'income' ? '수입 내역 수정' : '지출 내역 수정';
+      
+      document.getElementById('txDate').value = tx.date;
+
+      const accSelect = document.getElementById('txAccount');
+      accSelect.innerHTML = '';
+      state.accounts.forEach(a => {
+        accSelect.innerHTML += `<option value="${a.id}" ${a.id === tx.accountId ? 'selected' : ''}>${a.name} (${a.type==='stock'?'주식':'일반'})</option>`;
+      });
+
+      const catSelect = document.getElementById('txCategory');
+      catSelect.innerHTML = '';
+      state.categories.filter(c => c.type === tx.type).forEach(c => {
+        catSelect.innerHTML += `<option value="${c.name}" ${c.name === tx.category ? 'selected' : ''}>${c.name}</option>`;
+      });
+
+      document.getElementById('txTitle').value = tx.title;
+      calcExpression = String(tx.amount);
+      document.getElementById('txAmount').value = Number(tx.amount).toLocaleString();
+
+      openModal('transactionModal');
+    }
+
+    function formatNumberString(str) {
+      if (!str) return '0';
+      const parts = str.split(/([\+\-\*\/\(\)])/);
+      return parts.map(part => {
+        if (/^\d+$/.test(part)) {
+          return Number(part).toLocaleString();
+        }
+        return part;
+      }).join('');
+    }
+
     function calcInput(val) {
       const amountInput = document.getElementById('txAmount');
       if (val === 'C') {
@@ -784,7 +826,9 @@
         amountInput.value = '0';
       } else if (val === '=') {
         try {
-          calcExpression = String(eval(calcExpression) || 0);
+          let result = eval(calcExpression);
+          if (result === undefined || isNaN(result)) result = 0;
+          calcExpression = String(result);
           amountInput.value = Number(calcExpression).toLocaleString();
         } catch(e) {
           amountInput.value = '오류';
@@ -792,7 +836,7 @@
         }
       } else {
         calcExpression += val;
-        amountInput.value = calcExpression;
+        amountInput.value = formatNumberString(calcExpression);
       }
     }
 
@@ -805,11 +849,27 @@
       const category = document.getElementById('txCategory').value;
       
       let amount = 0;
-      try { amount = Number(eval(calcExpression || document.getElementById('txAmount').value.replace(/,/g, ''))); } catch(err){}
+      try { 
+        let evalExpr = calcExpression || document.getElementById('txAmount').value.replace(/,/g, '');
+        amount = Number(eval(evalExpr) || 0); 
+      } catch(err){}
 
       if (!amount || isNaN(amount)) return alert('올바른 금액을 입력하세요.');
 
-      const newTx = { id: 't_' + Date.now(), date, type, accountId, category, title, amount };
+      // 수정 모드인 경우 기존 내역의 자산 반영 되돌리기
+      if (editingTxId) {
+        const oldTx = state.transactions.find(t => t.id === editingTxId);
+        if (oldTx) {
+          const oldAcc = state.accounts.find(a => a.id === oldTx.accountId);
+          if (oldAcc) {
+            if (oldTx.type === 'income') oldAcc.balance -= oldTx.amount;
+            else oldAcc.balance += oldTx.amount;
+          }
+        }
+        state.transactions = state.transactions.filter(t => t.id !== editingTxId);
+      }
+
+      const newTx = { id: editingTxId || ('t_' + Date.now()), date, type, accountId, category, title, amount };
       state.transactions.push(newTx);
 
       const acc = state.accounts.find(a => a.id === accountId);
@@ -818,6 +878,7 @@
         else acc.balance -= amount;
       }
 
+      editingTxId = null;
       closeModal('transactionModal');
       renderAll();
     }
