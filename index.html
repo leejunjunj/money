@@ -36,7 +36,7 @@
 </head>
 <body class="text-slate-800 pb-28 select-none">
 
-  <!-- 최상단 컨트롤 바 (타이틀 제거 및 핑크 스타일링) -->
+  <!-- 최상단 컨트롤 바 -->
   <header class="sticky top-0 z-40 bg-white/90 backdrop-blur-md border-b border-pink-100 px-4 py-3 flex items-center justify-between shadow-sm">
     <div class="flex items-center gap-2 overflow-x-auto hide-scrollbar py-1">
       <button onclick="openModal('accountModal')" class="bg-pink-50 text-pink-600 px-3 py-1.5 rounded-full text-xs font-bold flex items-center gap-1.5 border border-pink-200 whitespace-nowrap active:scale-95 transition-transform">
@@ -66,13 +66,13 @@
     </button>
   </nav>
 
-  <!-- 메인 컨테이너 (스와이프 이벤트 영역) -->
+  <!-- 메인 컨테이너 -->
   <main id="swipeContainer" class="max-w-md mx-auto px-4 py-4 space-y-4">
 
     <!-- TAB 1: 가계부 메인 -->
     <div id="tabMain" class="space-y-4">
       
-      <!-- 1. 자산 현황 요약 (총 금액: 주식 제외 현금성 계좌만 합산) -->
+      <!-- 1. 자산 현황 요약 -->
       <section class="pink-card rounded-2xl p-4">
         <div class="flex justify-between items-center mb-3">
           <span class="text-xs font-bold text-pink-400 uppercase tracking-wider">총 보유 자산 (주식 제외)</span>
@@ -96,11 +96,11 @@
       <section class="grid grid-cols-2 gap-3">
         <div class="pink-card rounded-2xl p-4">
           <span class="text-xs font-bold text-emerald-500 block mb-1">이번 달 총 수입</span>
-          <div id="monthIncome" class="text-base font-extrabold text-emerald-600 truncate">₩0</div>
+          <div id="monthIncome" class="text-base font-extrabold text-emerald-600 truncate">+ ₩0</div>
         </div>
         <div class="pink-card rounded-2xl p-4">
           <span class="text-xs font-bold text-rose-500 block mb-1">이번 달 총 지출</span>
-          <div id="monthExpense" class="text-base font-extrabold text-rose-600 truncate">₩0</div>
+          <div id="monthExpense" class="text-base font-extrabold text-rose-600 truncate">- ₩0</div>
         </div>
       </section>
 
@@ -108,14 +108,14 @@
       <section class="pink-card rounded-2xl p-4">
         <div class="flex justify-between items-center text-xs mb-2">
           <span class="font-bold text-slate-600">이번 달 목표 예산</span>
-          <span id="budgetText" class="font-semibold text-pink-600">₩0 / ₩0</span>
+          <span id="budgetText" class="font-semibold text-pink-600">₩0 / ₩2,000,000</span>
         </div>
         <div class="w-full bg-pink-100 rounded-full h-2.5 overflow-hidden">
           <div id="budgetBar" class="bg-pink-500 h-2.5 rounded-full transition-all duration-500" style="width: 0%"></div>
         </div>
       </section>
 
-      <!-- 2. 달력 섹션 (달력 전용 스와이프 영역) -->
+      <!-- 2. 달력 섹션 -->
       <section class="pink-card rounded-2xl p-4">
         <div class="flex justify-between items-center mb-4">
           <div class="flex items-center gap-1">
@@ -127,14 +127,12 @@
               <i class="fa-solid fa-chevron-right text-xs"></i>
             </button>
           </div>
-          <!-- 연월 직접 선택 드럼롤/피커 -->
           <div class="flex gap-1">
             <select id="yearPicker" onchange="onPickerChange()" class="bg-pink-50 border border-pink-200 text-xs font-bold text-pink-600 rounded-lg px-2 py-1 focus:outline-none"></select>
             <select id="monthPicker" onchange="onPickerChange()" class="bg-pink-50 border border-pink-200 text-xs font-bold text-pink-600 rounded-lg px-2 py-1 focus:outline-none"></select>
           </div>
         </div>
 
-        <!-- Touch Swipe 전용 달력 컨테이너 -->
         <div id="calendarSwipeArea" class="touch-pan-y">
           <div class="grid grid-cols-7 text-center text-xs font-bold text-pink-400 mb-2">
             <div class="text-rose-400">일</div><div>월</div><div>화</div><div>수</div><div>목</div><div>금</div><div class="text-blue-400">토</div>
@@ -154,7 +152,7 @@
         <div id="stackTimeline" class="space-y-4"></div>
       </section>
 
-      <!-- 4. 기간별 요약 통계 (박스 글자 넘침 완전 방지) -->
+      <!-- 4. 기간별 요약 통계 -->
       <section class="pink-card rounded-2xl p-4">
         <h3 class="text-xs font-bold text-pink-500 mb-3 flex items-center gap-1.5">
           <i class="fa-solid fa-calculator"></i> 기간별 요약 통계
@@ -166,7 +164,7 @@
           </div>
           <div class="bg-pink-50/60 p-2.5 rounded-xl border border-pink-100 min-w-0">
             <span class="text-[10px] font-bold text-slate-400 block mb-1">월 순수익</span>
-            <span id="statNetIncome" class="text-xs font-extrabold text-pink-600 truncate block tracking-tight">₩0</span>
+            <span id="statNetIncome" class="text-xs font-extrabold text-pink-600 truncate block tracking-tight">+₩0</span>
           </div>
           <div class="bg-pink-50/60 p-2.5 rounded-xl border border-pink-100 min-w-0">
             <span class="text-[10px] font-bold text-slate-400 block mb-1">연간 누적지출</span>
@@ -231,7 +229,7 @@
 
   </main>
 
-  <!-- 하단 고정 수입/지출 버튼 (화면 중앙 완전 fixed 고정) -->
+  <!-- 하단 고정 수입/지출 버튼 -->
   <div class="fixed bottom-0 left-0 right-0 z-40 p-4 bg-gradient-to-t from-white via-white/80 to-transparent pointer-events-none">
     <div class="max-w-md mx-auto flex gap-3 pointer-events-auto">
       <button onclick="openTransactionModal('income')" class="flex-1 bg-emerald-500 hover:bg-emerald-600 text-white py-3.5 rounded-2xl font-bold shadow-lg shadow-emerald-200 flex items-center justify-center gap-2 active:scale-95 transition-all text-sm whitespace-nowrap">
@@ -243,7 +241,7 @@
     </div>
   </div>
 
-  <!-- MODAL: 수입 / 지출 입력 (화면 흔들림 방지 정돈) -->
+  <!-- MODAL: 수입 / 지출 입력 -->
   <div id="transactionModal" class="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-50 flex items-end justify-center hidden">
     <div class="bg-white rounded-t-3xl w-full max-w-md p-5 space-y-4 max-h-[90vh] overflow-y-auto hide-scrollbar border-t border-pink-100 shadow-2xl">
       <div class="flex justify-between items-center border-b border-pink-100 pb-3">
@@ -372,16 +370,15 @@
   </div>
 
   <script>
-    // --- STATE MANAGEMENT ---
+    // --- STATE MANAGEMENT (0원 및 빈 내역에서 시작) ---
     let state = {
       apiKey: 'Ab8RN6IIC9fJyvtmE3x2CI2bA7maOQSYyjtou1CWt-CxHVupxw',
       budget: 2000000,
       currentYear: 2026,
       currentMonth: 11,
       accounts: [
-        { id: 'acc1', name: '일반 계좌 (주거래)', type: 'general', balance: 3500000 },
-        { id: 'acc2', name: '비상금 통장', type: 'general', balance: 1200000 },
-        { id: 'acc3', name: '주식 계좌 (키움)', type: 'stock', balance: 5000000 }
+        { id: 'acc1', name: '일반 계좌 (주거래)', type: 'general', balance: 0 },
+        { id: 'acc2', name: '주식 계좌', type: 'stock', balance: 0 }
       ],
       categories: [
         { id: 'c1', name: '식비/카페', type: 'expense' },
@@ -392,12 +389,7 @@
         { id: 'c6', name: '월급/수입', type: 'income' },
         { id: 'c7', name: '용돈/부수입', type: 'income' }
       ],
-      transactions: [
-        { id: 't1', date: '2026-11-01', type: 'income', accountId: 'acc1', category: '월급/수입', title: '11월 급여', amount: 3200000 },
-        { id: 't2', date: '2026-11-02', type: 'expense', accountId: 'acc1', category: '식비/카페', title: '스타벅스 커피', amount: 5500 },
-        { id: 't3', date: '2026-11-03', type: 'expense', accountId: 'acc1', category: '교통/통신', title: '지하철 교통카드', amount: 1400 },
-        { id: 't4', date: '2026-11-04', type: 'expense', accountId: 'acc3', category: '주식/투자', title: '주식 매수', amount: 500000 }
-      ]
+      transactions: []
     };
 
     let calcExpression = '';
@@ -413,14 +405,14 @@
     });
 
     function loadLocalStorage() {
-      const saved = localStorage.getItem('pink_budget_data');
+      const saved = localStorage.getItem('pink_budget_data_v3');
       if (saved) {
         try { state = { ...state, ...JSON.parse(saved) }; } catch(e){}
       }
     }
 
     function saveLocalStorage() {
-      localStorage.setItem('pink_budget_data', JSON.stringify(state));
+      localStorage.setItem('pink_budget_data_v3', JSON.stringify(state));
     }
 
     function renderAll() {
@@ -432,9 +424,8 @@
       saveLocalStorage();
     }
 
-    // --- 1. BALANCES & BUDGET (주식 자산 분리 합산) ---
+    // --- 1. BALANCES & BUDGET ---
     function renderBalances() {
-      // 일반 계좌만 합산 (주식 제외)
       const generalTotal = state.accounts
         .filter(a => a.type === 'general')
         .reduce((sum, a) => sum + Number(a.balance), 0);
@@ -447,7 +438,6 @@
       document.getElementById('generalBalance').innerText = `₩${generalTotal.toLocaleString()}`;
       document.getElementById('stockBalance').innerText = `₩${stockTotal.toLocaleString()}`;
 
-      // 이번 달 수입/지출
       const currentMonthStr = `${state.currentYear}-${String(state.currentMonth).padStart(2, '0')}`;
       const monthTx = state.transactions.filter(t => t.date.startsWith(currentMonthStr));
       
@@ -457,14 +447,13 @@
       document.getElementById('monthIncome').innerText = `+ ₩${monthInc.toLocaleString()}`;
       document.getElementById('monthExpense').innerText = `- ₩${monthExp.toLocaleString()}`;
 
-      // 목표 예산 바
       document.getElementById('budgetText').innerText = `₩${monthExp.toLocaleString()} / ₩${Number(state.budget).toLocaleString()}`;
       const pct = Math.min(100, Math.round((monthExp / (state.budget || 1)) * 100));
       document.getElementById('budgetBar').style.width = `${pct}%`;
       document.getElementById('budgetInput').value = state.budget;
     }
 
-    // --- 2. CALENDAR (알약 배지 디자인 & 스와이프 연동) ---
+    // --- 2. CALENDAR ---
     function initPickers() {
       const yp = document.getElementById('yearPicker');
       const mp = document.getElementById('monthPicker');
@@ -500,7 +489,6 @@
       const firstDay = new Date(state.currentYear, state.currentMonth - 1, 1).getDay();
       const lastDate = new Date(state.currentYear, state.currentMonth, 0).getDate();
 
-      // 빈 칸
       for(let i=0; i<firstDay; i++) {
         grid.innerHTML += `<div class="h-14"></div>`;
       }
@@ -534,7 +522,6 @@
       const currentMonthStr = `${state.currentYear}-${String(state.currentMonth).padStart(2, '0')}`;
       const monthTx = state.transactions.filter(t => t.date.startsWith(currentMonthStr));
 
-      // 날짜별 그룹핑
       const grouped = {};
       monthTx.forEach(t => {
         if (!grouped[t.date]) grouped[t.date] = [];
@@ -565,7 +552,6 @@
               <div class="h-[1px] bg-pink-200 flex-1"></div>
             </div>
             <div class="grid grid-cols-2 gap-2 text-xs">
-              <!-- 수입 스택 (좌) -->
               <div class="space-y-1.5">
         `;
 
@@ -582,7 +568,7 @@
           `;
         });
 
-        html += `</div><!-- 지출 스택 (우) --><div class="space-y-1.5">`;
+        html += `</div><div class="space-y-1.5">`;
 
         expenses.forEach(t => {
           html += `
@@ -602,7 +588,7 @@
       });
     }
 
-    // --- 4. PERIOD STATS (박스 글자 넘침 방지) ---
+    // --- 4. PERIOD STATS ---
     function renderPeriodStats() {
       const currentMonthStr = `${state.currentYear}-${String(state.currentMonth).padStart(2, '0')}`;
       const monthTx = state.transactions.filter(t => t.date.startsWith(currentMonthStr));
@@ -646,7 +632,6 @@
     }
 
     function renderCharts() {
-      // 월별 트렌드 차트
       const ctxTrend = document.getElementById('monthlyTrendChart').getContext('2d');
       const months = [1,2,3,4,5,6,7,8,9,10,11,12];
       const monthlyData = months.map(m => {
@@ -673,7 +658,6 @@
         options: { responsive: true, maintainAspectRatio: false }
       });
 
-      // 카테고리 랭킹 차트
       const ctxPie = document.getElementById('categoryPieChart').getContext('2d');
       const currentMonthStr = `${state.currentYear}-${String(state.currentMonth).padStart(2, '0')}`;
       const monthExpTx = state.transactions.filter(t => t.date.startsWith(currentMonthStr) && t.type === 'expense');
@@ -699,9 +683,12 @@
         options: { responsive: true, maintainAspectRatio: false }
       });
 
-      // 랭킹 리스트 표기
       const rankingList = document.getElementById('categoryRankingList');
       rankingList.innerHTML = '';
+      if (sortedCat.length === 0) {
+        rankingList.innerHTML = `<div class="text-center text-xs text-slate-400 py-4">이번 달 지출 내역이 없습니다.</div>`;
+        return;
+      }
       sortedCat.forEach((cat, idx) => {
         rankingList.innerHTML += `
           <div class="flex justify-between items-center text-xs">
@@ -712,9 +699,8 @@
       });
     }
 
-    // --- 6. TOUCH SWIPE CONTROLLER (이중 영역 완전 분리) ---
+    // --- 6. TOUCH SWIPE CONTROLLER ---
     function setupSwipeEvents() {
-      // 1) 달력 영역 전용 스와이프 (달력 넘기기)
       const calArea = document.getElementById('calendarSwipeArea');
       let calStartX = 0, calStartY = 0;
 
@@ -728,17 +714,15 @@
         const diffY = e.changedTouches[0].clientY - calStartY;
 
         if (Math.abs(diffX) > 40 && Math.abs(diffX) > Math.abs(diffY)) {
-          if (diffX > 0) changeMonth(-1); // 이전달
-          else changeMonth(1);           // 다음달
+          if (diffX > 0) changeMonth(-1);
+          else changeMonth(1);
         }
       }, { passive: true });
 
-      // 2) 전체 메인 영역 스와이프 (달력 외 영역에서 탭 전환)
       const mainArea = document.getElementById('swipeContainer');
       let mainStartX = 0, mainStartY = 0;
 
       mainArea.addEventListener('touchstart', (e) => {
-        // 달력 내부 터치면 전체 스와이프 탭 전환 동작 생략
         if (calArea.contains(e.target)) return;
         mainStartX = e.touches[0].clientX;
         mainStartY = e.touches[0].clientY;
@@ -750,8 +734,8 @@
         const diffY = e.changedTouches[0].clientY - mainStartY;
 
         if (Math.abs(diffX) > 50 && Math.abs(diffX) > Math.abs(diffY)) {
-          if (diffX < 0) switchTab('chart'); // 오른쪽에서 왼쪽 스와이프 -> 차트 탭
-          else switchTab('main');           // 왼쪽에서 오른쪽 스와이프 -> 메인 탭
+          if (diffX < 0) switchTab('chart');
+          else switchTab('main');
         }
       }, { passive: true });
     }
@@ -774,14 +758,12 @@
       const today = new Date().toISOString().split('T')[0];
       document.getElementById('txDate').value = today;
 
-      // 계좌 셀렉트
       const accSelect = document.getElementById('txAccount');
       accSelect.innerHTML = '';
       state.accounts.forEach(a => {
         accSelect.innerHTML += `<option value="${a.id}">${a.name} (${a.type==='stock'?'주식':'일반'})</option>`;
       });
 
-      // 카테고리 셀렉트
       const catSelect = document.getElementById('txCategory');
       catSelect.innerHTML = '';
       state.categories.filter(c => c.type === type).forEach(c => {
@@ -830,7 +812,6 @@
       const newTx = { id: 't_' + Date.now(), date, type, accountId, category, title, amount };
       state.transactions.push(newTx);
 
-      // 계좌 잔액 업데이트
       const acc = state.accounts.find(a => a.id === accountId);
       if (acc) {
         if (type === 'income') acc.balance += amount;
