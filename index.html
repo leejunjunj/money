@@ -2,482 +2,1001 @@
 <html lang="ko">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>대한민국 맞춤형 정부 정책 통합 알리미</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>스마트 AI 가계부</title>
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Chart.js -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <!-- FontAwesome Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <style>
-    :root {
-      --primary: #2563eb;
-      --primary-hover: #1d4ed8;
-      --bg: #f8fafc;
-      --card-bg: #ffffff;
-      --text: #0f172a;
-      --border: #e2e8f0;
-      --star: #f59e0b;
+    @import url('https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css');
+    * { font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif; }
+    
+    body {
+      background-color: #fff0f3;
+      touch-action: pan-y;
+      -webkit-tap-highlight-color: transparent;
     }
-
-    * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
-    body { background-color: var(--bg); color: var(--text); padding: 20px; max-width: 1280px; margin: 0 auto; line-height: 1.5; }
-
-    header { text-align: center; padding: 20px 0; margin-bottom: 20px; }
-    header h1 { font-size: 2rem; color: var(--primary); font-weight: 800; }
-    header p { color: #64748b; font-size: 0.95rem; margin-top: 6px; }
-
-    /* 1. 조건 선택 박스 영역 */
-    .filter-card {
-      background: var(--card-bg);
-      padding: 24px;
-      border-radius: 16px;
-      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.06);
-      margin-bottom: 32px;
-      border: 1px solid var(--border);
+    
+    .pink-gradient {
+      background: linear-gradient(135deg, #ff758c 0%, #ff7eb3 100%);
     }
-
-    .picker-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
-      gap: 16px;
-      margin-bottom: 20px;
+    
+    .pink-card {
+      background: #ffffff;
+      border: 1px solid #ffe3e8;
+      box-shadow: 0 4px 15px rgba(255, 117, 140, 0.08);
     }
-
-    .picker-group { display: flex; flex-direction: column; }
-    .picker-group label { font-weight: 700; font-size: 0.85rem; color: #475569; margin-bottom: 8px; text-align: center; }
-
-    .select-box {
-      width: 100%;
-      height: 48px;
-      padding: 0 12px;
-      border: 2px solid var(--border);
-      border-radius: 10px;
-      background: #f1f5f9;
-      font-size: 0.95rem;
-      font-weight: 600;
-      color: var(--text);
-      outline: none;
-      cursor: pointer;
-      transition: border-color 0.2s;
-    }
-    .select-box:focus { border-color: var(--primary); background: #fff; }
-
-    .search-btn {
-      width: 100%;
-      padding: 14px;
-      background: var(--primary);
-      color: white;
-      border: none;
-      border-radius: 10px;
-      font-size: 1.05rem;
-      font-weight: 700;
-      cursor: pointer;
-      transition: background 0.2s;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      gap: 8px;
-    }
-    .search-btn:hover { background: var(--primary-hover); }
-
-    /* 레이아웃 & 섹션 */
-    .section-title {
-      font-size: 1.35rem;
-      font-weight: 800;
-      margin: 32px 0 16px 0;
-      padding-bottom: 8px;
-      border-bottom: 2px solid var(--primary);
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
-
-    .policy-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-      gap: 20px;
-    }
-
-    /* 2. 정책 카드 스타일 */
-    .policy-card {
-      background: var(--card-bg);
-      border-radius: 12px;
-      padding: 20px;
-      border: 1px solid var(--border);
-      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
-      position: relative;
-      cursor: pointer;
-      transition: transform 0.2s, box-shadow 0.2s;
-      display: flex;
-      flex-direction: column;
-      justify-content: space-between;
-    }
-    .policy-card:hover { transform: translateY(-4px); box-shadow: 0 8px 16px rgba(0, 0, 0, 0.08); }
-
-    .star-btn {
-      position: absolute;
-      top: 16px;
-      right: 16px;
-      font-size: 1.5rem;
-      color: #cbd5e1;
-      cursor: pointer;
-      user-select: none;
-      transition: color 0.2s, transform 0.1s;
-    }
-    .star-btn:hover { transform: scale(1.15); }
-    .star-btn.active { color: var(--star); }
-
-    .badge-container { display: flex; gap: 6px; margin-bottom: 10px; flex-wrap: wrap; }
-    .badge {
-      padding: 4px 8px;
-      border-radius: 6px;
-      font-size: 0.75rem;
-      font-weight: 700;
-    }
-    .badge-ongoing { background: #dcfce7; color: #15803d; }
-    .badge-upcoming { background: #fef3c7; color: #b45309; }
-    .badge-cat { background: #e0e7ff; color: #3730a3; }
-
-    .policy-card h3 { font-size: 1.1rem; font-weight: 700; margin-bottom: 8px; padding-right: 28px; line-height: 1.3; }
-    .policy-card p { font-size: 0.88rem; color: #475569; margin-bottom: 14px; line-height: 1.45; }
-    .policy-meta { font-size: 0.78rem; color: #94a3b8; border-top: 1px solid #f1f5f9; padding-top: 10px; }
-
-    .empty-msg { color: #94a3b8; font-size: 0.95rem; padding: 24px 0; width: 100%; grid-column: 1 / -1; }
+    
+    .hide-scrollbar::-webkit-scrollbar { display: none; }
+    .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
   </style>
 </head>
-<body>
+<body class="text-slate-800 pb-28 select-none">
 
-  <header>
-    <h1>대한민국 맞춤형 정부 정책 통합 알리미</h1>
-    <p>내 조건만 선택하면 받을 수 있는 모든 혜택 및 신청 사이트를 안내해 드립니다.</p>
+  <!-- 최상단 컨트롤 바 (타이틀 제거 및 핑크 스타일링) -->
+  <header class="sticky top-0 z-40 bg-white/90 backdrop-blur-md border-b border-pink-100 px-4 py-3 flex items-center justify-between shadow-sm">
+    <div class="flex items-center gap-2 overflow-x-auto hide-scrollbar py-1">
+      <button onclick="openModal('accountModal')" class="bg-pink-50 text-pink-600 px-3 py-1.5 rounded-full text-xs font-bold flex items-center gap-1.5 border border-pink-200 whitespace-nowrap active:scale-95 transition-transform">
+        <i class="fa-solid fa-wallet"></i> 자산 관리
+      </button>
+      <button onclick="exportCSV(true)" class="bg-pink-50 text-pink-600 px-3 py-1.5 rounded-full text-xs font-bold flex items-center gap-1.5 border border-pink-200 whitespace-nowrap active:scale-95 transition-transform">
+        <i class="fa-solid fa-file-csv"></i> 월별 내보내기
+      </button>
+      <button onclick="exportCSV(false)" class="bg-pink-50 text-pink-600 px-3 py-1.5 rounded-full text-xs font-bold flex items-center gap-1.5 border border-pink-200 whitespace-nowrap active:scale-95 transition-transform">
+        <i class="fa-solid fa-file-export"></i> 전체 내보내기
+      </button>
+    </div>
+    <div class="flex items-center gap-2 pl-2">
+      <button onclick="openModal('apiKeyModal')" class="text-pink-400 hover:text-pink-600 p-1.5 rounded-full hover:bg-pink-50">
+        <i class="fa-solid fa-key"></i>
+      </button>
+    </div>
   </header>
 
-  <!-- 1. 필터링 영역 -->
-  <section class="filter-card">
-    <div class="picker-grid">
-      <div class="picker-group">
-        <label>성별</label>
-        <select id="filter-gender" class="select-box">
-          <option value="전체">전체</option>
-          <option value="남성">남성</option>
-          <option value="여성">여성</option>
-        </select>
-      </div>
-      <div class="picker-group">
-        <label>나이</label>
-        <select id="filter-age" class="select-box">
-          <option value="전체">전체</option>
-          <option value="19">19세 이하</option>
-          <option value="25">20~29세</option>
-          <option value="35">30~39세</option>
-          <option value="45">40~49세</option>
-          <option value="60">50세 이상</option>
-        </select>
-      </div>
-      <div class="picker-group">
-        <label>직업 상태</label>
-        <select id="filter-job" class="select-box">
-          <option value="전체">전체</option>
-          <option value="대학생">대학생/대학원생</option>
-          <option value="취업준비생">취업준비생/구직자</option>
-          <option value="직장인">직장인/근로자</option>
-          <option value="군인">군인/의무복무자</option>
-          <option value="자영업자">자영업자/소상공인</option>
-        </select>
-      </div>
-      <div class="picker-group">
-        <label>거주 지역</label>
-        <select id="filter-region" class="select-box">
-          <option value="전체">전국 (공통)</option>
-          <option value="서울">서울특별시</option>
-          <option value="경기">경기도</option>
-          <option value="부산">부산광역시</option>
-          <option value="기타">기타 광역시/도</option>
-        </select>
-      </div>
-      <div class="picker-group">
-        <label>소득 구간</label>
-        <select id="filter-income" class="select-box">
-          <option value="전체">전체</option>
-          <option value="저소득">중위소득 50% 이하 (저소득)</option>
-          <option value="중위소득">중위소득 100% 이하</option>
-          <option value="일반">중위소득 100% 초과/상관없음</option>
-        </select>
-      </div>
-      <div class="picker-group">
-        <label>소득 수단</label>
-        <select id="filter-source" class="select-box">
-          <option value="전체">전체</option>
-          <option value="근로소득">근로소득</option>
-          <option value="사업소득">사업소득</option>
-          <option value="무소득">무소득/보조금</option>
-        </select>
-      </div>
-    </div>
-    <button class="search-btn" onclick="renderAll()">🔍 맞춤 정책 검색하기</button>
-  </section>
+  <!-- 탭 네비게이션 -->
+  <nav class="flex border-b border-pink-200 bg-white sticky top-[53px] z-30">
+    <button id="tabBtnMain" onclick="switchTab('main')" class="flex-1 py-3 text-center text-sm font-bold text-pink-600 border-b-2 border-pink-500 transition-colors">
+      <i class="fa-solid fa-house mr-1"></i> 가계부 메인
+    </button>
+    <button id="tabBtnChart" onclick="switchTab('chart')" class="flex-1 py-3 text-center text-sm font-bold text-slate-400 border-b-2 border-transparent transition-colors">
+      <i class="fa-solid fa-chart-pie mr-1"></i> 소비 분석 차트
+    </button>
+  </nav>
 
-  <!-- 3. 별표(즐겨찾기) 정책 섹션 -->
-  <section id="starred-section">
-    <h2 class="section-title">⭐ 즐겨찾기한 정책</h2>
-    <div class="policy-grid" id="starred-grid"></div>
-  </section>
+  <!-- 메인 컨테이너 (스와이프 이벤트 영역) -->
+  <main id="swipeContainer" class="max-w-md mx-auto px-4 py-4 space-y-4">
 
-  <!-- 4. 신청 예정 정책 섹션 -->
-  <section id="upcoming-section">
-    <h2 class="section-title">📅 신청 예정 정책</h2>
-    <div class="policy-grid" id="upcoming-grid"></div>
-  </section>
-
-  <!-- 2. 카테고리/섹터별 정책 섹션 -->
-  <section id="category-section"></section>
-
-  <script>
-    // 현재 기준일 (자동 마감 처리 검증용)
-    const todayStr = "2026-10-01";
-
-    // 실제 대한민국 정부/지자체 주요 정책 데이터베이스 (실제 존재하는 정보 기반)
-    const policyDatabase = [
-      {
-        id: 1,
-        title: "K-패스 (대중교통비 환급 지원)",
-        category: "문화/교통",
-        desc: "월 15회 이상 대중교통 이용 시 지출금액의 일정 비율(청년 30%, 일반 20%, 저소득 53%) 환급",
-        jobs: ["전체"],
-        region: "전체",
-        income: "전체",
-        link: "https://korea-pass.kr",
-        startDate: "2024-05-01",
-        endDate: "2028-12-31",
-        status: "ongoing"
-      },
-      {
-        id: 2,
-        title: "청년월세 특별지원",
-        category: "주거/월세",
-        desc: "부모와 따로 거주하는 무주택 청년 대상 월 최대 20만 원씩 12개월간 월세 지원",
-        jobs: ["대학생", "취업준비생", "직장인"],
-        region: "전체",
-        income: "저소득",
-        link: "https://www.bokjiro.go.kr",
-        startDate: "2024-02-26",
-        endDate: "2027-12-31",
-        status: "ongoing"
-      },
-      {
-        id: 3,
-        title: "청년도약계좌",
-        category: "서민금융/자산",
-        desc: "5년 납입 시 정부기여금 및 비과세 혜택으로 목돈(최대 5,000만원)을 마련할 수 있는 청년 적금",
-        jobs: ["직장인", "자영업자", "취업준비생"],
-        region: "전체",
-        income: "중위소득",
-        link: "https://www.kinfa.or.kr",
-        startDate: "2023-06-15",
-        endDate: "2027-12-31",
-        status: "ongoing"
-      },
-      {
-        id: 4,
-        title: "장병 내일준비적금",
-        category: "군인",
-        desc: "현역병/상근예비역 등 의무복무자 대상 정부 매칭지원금(원금의 100% 수준)을 더해 목돈을 마련하는 적금",
-        jobs: ["군인"],
-        region: "전체",
-        income: "전체",
-        link: "https://www.mma.go.kr",
-        startDate: "2022-01-01",
-        endDate: "2028-12-31",
-        status: "ongoing"
-      },
-      {
-        id: 5,
-        title: "국가장학금 I유형 및 다자녀",
-        category: "대학생",
-        desc: "대학생 소득구간 연계 맞춤형 등록금 지원 사업 (한국장학재단)",
-        jobs: ["대학생"],
-        region: "전체",
-        income: "전체",
-        link: "https://www.kosaf.go.kr",
-        startDate: "2024-01-01",
-        endDate: "2027-12-31",
-        status: "ongoing"
-      },
-      {
-        id: 6,
-        title: "국민취업지원제도 (1유형/2유형)",
-        category: "취업/창업",
-        desc: "취업을 희망하는 구직자에게 취업지원서비스 및 구직촉진수당(월 50만원×6개월) 제공",
-        jobs: ["취업준비생"],
-        region: "전체",
-        income: "전체",
-        link: "https://www.kua.go.kr",
-        startDate: "2021-01-01",
-        endDate: "2028-12-31",
-        status: "ongoing"
-      },
-      {
-        id: 7,
-        title: "스포츠강좌이용권 지원사업",
-        category: "문화/교통",
-        desc: "유·청소년 및 저소득층 가구 대상 스포츠 수강료 월 최대 10만원 지원",
-        jobs: ["전체"],
-        region: "전체",
-        income: "저소득",
-        link: "https://svoucher.kspo.or.kr",
-        startDate: "2024-01-01",
-        endDate: "2027-12-31",
-        status: "ongoing"
-      },
-      {
-        id: 8,
-        title: "소상공인 전기요금 특별지원",
-        category: "소상공인/자영업",
-        desc: "영세 소상공인의 경영 부담 완화를 위해 전기요금을 사업자당 최대 20만 원 직접 지원",
-        jobs: ["자영업자"],
-        region: "전체",
-        income: "전체",
-        link: "https://소상공인전기요금특별지원.kr",
-        startDate: "2024-02-21",
-        endDate: "2026-12-31",
-        status: "ongoing"
-      },
-      {
-        id: 9,
-        title: "2027년도 상반기 대학생 근로장학금 모집",
-        category: "대학생",
-        desc: "교내외 근로 참여 대학생 대상 학자금 마련 지원사업",
-        jobs: ["대학생"],
-        region: "전체",
-        income: "전체",
-        link: "https://www.kosaf.go.kr",
-        startDate: "2027-01-15",
-        endDate: "2027-02-28",
-        status: "upcoming" // 신청 예정
-      },
-      {
-        id: 10,
-        title: "청년 문화예술패스",
-        category: "문화/교통",
-        desc: "19세 청년(2005년생) 대상 연 최대 15만 원 공연·전시 관람비 지원",
-        jobs: ["전체", "대학생", "취업준비생"],
-        region: "전체",
-        income: "전체",
-        link: "https://www.korea.kr",
-        startDate: "2024-03-28",
-        endDate: "2026-11-30",
-        status: "ongoing"
-      }
-    ];
-
-    let starredIds = new Set();
-
-    // 4. 마감 정책 자동 제거 및 필터링 함수
-    function getFilteredPolicies() {
-      const gender = document.getElementById('filter-gender').value;
-      const age = document.getElementById('filter-age').value;
-      const job = document.getElementById('filter-job').value;
-      const region = document.getElementById('filter-region').value;
-      const income = document.getElementById('filter-income').value;
-
-      return policyDatabase.filter(policy => {
-        // [자동 마감 처리] 마감 기한이 지난 정책은 쌓이지 않고 삭제(제외)
-        if (policy.endDate < todayStr) return false;
-
-        // 직업 조건 필터
-        if (job !== '전체' && !policy.jobs.includes('전체') && !policy.jobs.includes(job)) {
-          return false;
-        }
-
-        // 지역 조건 필터
-        if (region !== '전체' && policy.region !== '전체' && policy.region !== region) {
-          return false;
-        }
-
-        // 소득 조건 필터
-        if (income !== '전체' && policy.income !== '전체' && policy.income !== income) {
-          return false;
-        }
-
-        return true;
-      });
-    }
-
-    // 카드 HTML 생성
-    function createCard(policy) {
-      const isStarred = starredIds.has(policy.id);
-      const isUpcoming = policy.startDate > todayStr || policy.status === 'upcoming';
-      const badgeText = isUpcoming ? '접수 예정' : '신청 가능';
-      const badgeClass = isUpcoming ? 'badge-upcoming' : 'badge-ongoing';
-
-      return `
-        <div class="policy-card" onclick="window.open('${policy.link}', '_blank')">
-          <span class="star-btn ${isStarred ? 'active' : ''}" onclick="toggleStar(event, ${policy.id})">★</span>
-          <div>
-            <div class="badge-container">
-              <span class="badge ${badgeClass}">${badgeText}</span>
-              <span class="badge badge-cat">${policy.category}</span>
-            </div>
-            <h3>${policy.title}</h3>
-            <p>${policy.desc}</p>
+    <!-- TAB 1: 가계부 메인 -->
+    <div id="tabMain" class="space-y-4">
+      
+      <!-- 1. 자산 현황 요약 (총 금액: 주식 제외 현금성 계좌만 합산) -->
+      <section class="pink-card rounded-2xl p-4">
+        <div class="flex justify-between items-center mb-3">
+          <span class="text-xs font-bold text-pink-400 uppercase tracking-wider">총 보유 자산 (주식 제외)</span>
+          <button onclick="openModal('accountModal')" class="text-xs text-pink-500 font-semibold hover:underline">편집</button>
+        </div>
+        <div id="totalBalance" class="text-2xl font-black text-slate-800 tracking-tight truncate">₩0</div>
+        
+        <div class="mt-4 pt-3 border-t border-pink-100 grid grid-cols-2 gap-3 text-xs">
+          <div class="bg-pink-50/50 p-2.5 rounded-xl border border-pink-100/60">
+            <span class="text-slate-500 block mb-0.5">일반 계좌 합계</span>
+            <span id="generalBalance" class="font-bold text-slate-700 truncate block">₩0</span>
           </div>
-          <div class="policy-meta">
-            신청기간: ${policy.startDate} ~ ${policy.endDate}
+          <div class="bg-purple-50/50 p-2.5 rounded-xl border border-purple-100/60">
+            <span class="text-purple-600 block mb-0.5">📈 주식 계좌 (별도)</span>
+            <span id="stockBalance" class="font-bold text-purple-700 truncate block">₩0</span>
           </div>
         </div>
-      `;
+      </section>
+
+      <!-- 이번 달 수입 / 지출 요약 -->
+      <section class="grid grid-cols-2 gap-3">
+        <div class="pink-card rounded-2xl p-4">
+          <span class="text-xs font-bold text-emerald-500 block mb-1">이번 달 총 수입</span>
+          <div id="monthIncome" class="text-base font-extrabold text-emerald-600 truncate">₩0</div>
+        </div>
+        <div class="pink-card rounded-2xl p-4">
+          <span class="text-xs font-bold text-rose-500 block mb-1">이번 달 총 지출</span>
+          <div id="monthExpense" class="text-base font-extrabold text-rose-600 truncate">₩0</div>
+        </div>
+      </section>
+
+      <!-- 월별 예산 프로그레스 바 -->
+      <section class="pink-card rounded-2xl p-4">
+        <div class="flex justify-between items-center text-xs mb-2">
+          <span class="font-bold text-slate-600">이번 달 목표 예산</span>
+          <span id="budgetText" class="font-semibold text-pink-600">₩0 / ₩0</span>
+        </div>
+        <div class="w-full bg-pink-100 rounded-full h-2.5 overflow-hidden">
+          <div id="budgetBar" class="bg-pink-500 h-2.5 rounded-full transition-all duration-500" style="width: 0%"></div>
+        </div>
+      </section>
+
+      <!-- 2. 달력 섹션 (달력 전용 스와이프 영역) -->
+      <section class="pink-card rounded-2xl p-4">
+        <div class="flex justify-between items-center mb-4">
+          <div class="flex items-center gap-1">
+            <button onclick="changeMonth(-1)" class="w-8 h-8 rounded-full hover:bg-pink-50 flex items-center justify-center text-pink-500">
+              <i class="fa-solid fa-chevron-left text-xs"></i>
+            </button>
+            <span id="currentMonthLabel" class="text-base font-bold text-slate-800">2026년 11월</span>
+            <button onclick="changeMonth(1)" class="w-8 h-8 rounded-full hover:bg-pink-50 flex items-center justify-center text-pink-500">
+              <i class="fa-solid fa-chevron-right text-xs"></i>
+            </button>
+          </div>
+          <!-- 연월 직접 선택 드럼롤/피커 -->
+          <div class="flex gap-1">
+            <select id="yearPicker" onchange="onPickerChange()" class="bg-pink-50 border border-pink-200 text-xs font-bold text-pink-600 rounded-lg px-2 py-1 focus:outline-none"></select>
+            <select id="monthPicker" onchange="onPickerChange()" class="bg-pink-50 border border-pink-200 text-xs font-bold text-pink-600 rounded-lg px-2 py-1 focus:outline-none"></select>
+          </div>
+        </div>
+
+        <!-- Touch Swipe 전용 달력 컨테이너 -->
+        <div id="calendarSwipeArea" class="touch-pan-y">
+          <div class="grid grid-cols-7 text-center text-xs font-bold text-pink-400 mb-2">
+            <div class="text-rose-400">일</div><div>월</div><div>화</div><div>수</div><div>목</div><div>금</div><div class="text-blue-400">토</div>
+          </div>
+          <div id="calendarGrid" class="grid grid-cols-7 gap-1 text-center text-xs"></div>
+        </div>
+      </section>
+
+      <!-- 3. 수입/지출 2열 스택 타임라인 -->
+      <section class="space-y-3">
+        <div class="flex justify-between items-center px-1">
+          <h3 class="text-sm font-bold text-slate-700 flex items-center gap-1.5">
+            <i class="fa-solid fa-layer-group text-pink-500"></i> 내역 타임라인
+          </h3>
+          <span class="text-xs text-pink-400">좌: 수입 | 우: 지출</span>
+        </div>
+        <div id="stackTimeline" class="space-y-4"></div>
+      </section>
+
+      <!-- 4. 기간별 요약 통계 (박스 글자 넘침 완전 방지) -->
+      <section class="pink-card rounded-2xl p-4">
+        <h3 class="text-xs font-bold text-pink-500 mb-3 flex items-center gap-1.5">
+          <i class="fa-solid fa-calculator"></i> 기간별 요약 통계
+        </h3>
+        <div class="grid grid-cols-3 gap-2 text-center">
+          <div class="bg-pink-50/60 p-2.5 rounded-xl border border-pink-100 min-w-0">
+            <span class="text-[10px] font-bold text-slate-400 block mb-1">일평균 지출</span>
+            <span id="statDailyAvg" class="text-xs font-extrabold text-slate-700 truncate block tracking-tight">₩0</span>
+          </div>
+          <div class="bg-pink-50/60 p-2.5 rounded-xl border border-pink-100 min-w-0">
+            <span class="text-[10px] font-bold text-slate-400 block mb-1">월 순수익</span>
+            <span id="statNetIncome" class="text-xs font-extrabold text-pink-600 truncate block tracking-tight">₩0</span>
+          </div>
+          <div class="bg-pink-50/60 p-2.5 rounded-xl border border-pink-100 min-w-0">
+            <span class="text-[10px] font-bold text-slate-400 block mb-1">연간 누적지출</span>
+            <span id="statYearlyExpense" class="text-xs font-extrabold text-slate-700 truncate block tracking-tight">₩0</span>
+          </div>
+        </div>
+      </section>
+
+      <!-- 5. Gemini AI 소비 분석 리포트 -->
+      <section class="pink-gradient rounded-2xl p-4 text-white shadow-lg shadow-pink-200">
+        <div class="flex justify-between items-center mb-2">
+          <div class="flex items-center gap-2">
+            <i class="fa-solid fa-wand-magic-sparkles text-yellow-200"></i>
+            <h3 class="font-bold text-sm">Gemini AI 소비 분석</h3>
+          </div>
+          <button onclick="runAiAnalysis()" class="bg-white/20 hover:bg-white/30 text-white text-xs px-3 py-1 rounded-full font-semibold backdrop-blur-sm transition-colors active:scale-95">
+            분석 실행
+          </button>
+        </div>
+        <p class="text-xs text-pink-100 mb-3">이번 달 소비 데이터를 기반으로 AI가 과소비 항목 및 맞춤형 소비 습관 개선 가이드를 정리해 드립니다.</p>
+        <div id="aiResultBox" class="bg-white/10 backdrop-blur-md rounded-xl p-3 text-xs text-white/90 leading-relaxed min-h-[60px] hidden"></div>
+      </section>
+
+      <!-- 6. 설정 & 카테고리 / 목표 관리 -->
+      <section class="pink-card rounded-2xl p-4 space-y-3">
+        <h3 class="text-xs font-bold text-slate-600 flex items-center gap-1.5">
+          <i class="fa-solid fa-sliders text-pink-500"></i> 목표 예산 & 카테고리 설정
+        </h3>
+        <div class="flex gap-2">
+          <input type="number" id="budgetInput" placeholder="월 목표 예산 입력" class="flex-1 border border-pink-200 rounded-xl px-3 py-2 text-xs focus:outline-none focus:border-pink-500">
+          <button onclick="saveBudget()" class="bg-pink-500 text-white px-4 py-2 rounded-xl text-xs font-bold hover:bg-pink-600 active:scale-95">저장</button>
+        </div>
+        <div class="flex justify-between items-center pt-2 border-t border-pink-100">
+          <span class="text-xs text-slate-500">카테고리 및 계좌 항목 수정</span>
+          <button onclick="openModal('categoryModal')" class="text-xs font-bold text-pink-600 bg-pink-50 border border-pink-200 px-3 py-1.5 rounded-lg">편집하기</button>
+        </div>
+      </section>
+
+    </div>
+
+    <!-- TAB 2: 소비 분석 차트 -->
+    <div id="tabChart" class="space-y-4 hidden">
+      <section class="pink-card rounded-2xl p-4">
+        <h3 class="text-sm font-bold text-slate-700 mb-3 flex items-center gap-1.5">
+          <i class="fa-solid fa-chart-line text-pink-500"></i> 월별 지출 트렌드
+        </h3>
+        <div class="h-56">
+          <canvas id="monthlyTrendChart"></canvas>
+        </div>
+      </section>
+
+      <section class="pink-card rounded-2xl p-4">
+        <h3 class="text-sm font-bold text-slate-700 mb-3 flex items-center gap-1.5">
+          <i class="fa-solid fa-crown text-amber-400"></i> 지출 카테고리 랭킹
+        </h3>
+        <div class="h-48 mb-4">
+          <canvas id="categoryPieChart"></canvas>
+        </div>
+        <div id="categoryRankingList" class="space-y-2 pt-2 border-t border-pink-100"></div>
+      </section>
+    </div>
+
+  </main>
+
+  <!-- 하단 고정 수입/지출 버튼 (화면 중앙 완전 fixed 고정) -->
+  <div class="fixed bottom-0 left-0 right-0 z-40 p-4 bg-gradient-to-t from-white via-white/80 to-transparent pointer-events-none">
+    <div class="max-w-md mx-auto flex gap-3 pointer-events-auto">
+      <button onclick="openTransactionModal('income')" class="flex-1 bg-emerald-500 hover:bg-emerald-600 text-white py-3.5 rounded-2xl font-bold shadow-lg shadow-emerald-200 flex items-center justify-center gap-2 active:scale-95 transition-all text-sm whitespace-nowrap">
+        <i class="fa-solid fa-circle-plus"></i> 수입 입력
+      </button>
+      <button onclick="openTransactionModal('expense')" class="flex-1 bg-pink-500 hover:bg-pink-600 text-white py-3.5 rounded-2xl font-bold shadow-lg shadow-pink-200 flex items-center justify-center gap-2 active:scale-95 transition-all text-sm whitespace-nowrap">
+        <i class="fa-solid fa-circle-minus"></i> 지출 입력
+      </button>
+    </div>
+  </div>
+
+  <!-- MODAL: 수입 / 지출 입력 (화면 흔들림 방지 정돈) -->
+  <div id="transactionModal" class="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-50 flex items-end justify-center hidden">
+    <div class="bg-white rounded-t-3xl w-full max-w-md p-5 space-y-4 max-h-[90vh] overflow-y-auto hide-scrollbar border-t border-pink-100 shadow-2xl">
+      <div class="flex justify-between items-center border-b border-pink-100 pb-3">
+        <h3 id="modalTitle" class="font-bold text-base text-slate-800">내역 입력</h3>
+        <button onclick="closeModal('transactionModal')" class="text-slate-400 hover:text-slate-600 p-1">
+          <i class="fa-solid fa-xmark text-lg"></i>
+        </button>
+      </div>
+
+      <form id="txForm" onsubmit="handleTxSubmit(event)" class="space-y-3">
+        <input type="hidden" id="txType" value="expense">
+        
+        <div>
+          <label class="text-xs font-bold text-slate-500 block mb-1">날짜</label>
+          <input type="date" id="txDate" required class="w-full border border-pink-200 rounded-xl px-3 py-2.5 text-xs font-semibold focus:outline-none focus:border-pink-500 bg-pink-50/30">
+        </div>
+
+        <div>
+          <label class="text-xs font-bold text-slate-500 block mb-1">계좌 선택</label>
+          <select id="txAccount" required class="w-full border border-pink-200 rounded-xl px-3 py-2.5 text-xs font-semibold focus:outline-none focus:border-pink-500 bg-white"></select>
+        </div>
+
+        <div>
+          <div class="flex justify-between items-center mb-1">
+            <label class="text-xs font-bold text-slate-500">상세 명칭 (사용처)</label>
+            <button type="button" onclick="autoSuggestCategory()" class="text-[11px] text-pink-500 font-bold hover:underline">
+              <i class="fa-solid fa-wand-sparkles"></i> AI 카테고리 추천
+            </button>
+          </div>
+          <input type="text" id="txTitle" placeholder="예: 스타벅스, 월급" required class="w-full border border-pink-200 rounded-xl px-3 py-2.5 text-xs focus:outline-none focus:border-pink-500">
+        </div>
+
+        <div>
+          <label class="text-xs font-bold text-slate-500 block mb-1">카테고리</label>
+          <select id="txCategory" required class="w-full border border-pink-200 rounded-xl px-3 py-2.5 text-xs font-semibold focus:outline-none focus:border-pink-500 bg-white"></select>
+        </div>
+
+        <div>
+          <label class="text-xs font-bold text-slate-500 block mb-1">금액</label>
+          <div class="relative">
+            <input type="text" id="txAmount" readonly placeholder="0" class="w-full border border-pink-200 rounded-xl px-3 py-2.5 text-right font-black text-lg text-slate-800 bg-pink-50/30 focus:outline-none">
+          </div>
+        </div>
+
+        <!-- 계산기 키패드 -->
+        <div class="grid grid-cols-4 gap-1.5 pt-1">
+          <button type="button" onclick="calcInput('7')" class="bg-slate-100 hover:bg-slate-200 font-bold py-2.5 rounded-xl text-sm">7</button>
+          <button type="button" onclick="calcInput('8')" class="bg-slate-100 hover:bg-slate-200 font-bold py-2.5 rounded-xl text-sm">8</button>
+          <button type="button" onclick="calcInput('9')" class="bg-slate-100 hover:bg-slate-200 font-bold py-2.5 rounded-xl text-sm">9</button>
+          <button type="button" onclick="calcInput('/')" class="bg-pink-100 text-pink-600 font-bold py-2.5 rounded-xl text-sm">÷</button>
+          
+          <button type="button" onclick="calcInput('4')" class="bg-slate-100 hover:bg-slate-200 font-bold py-2.5 rounded-xl text-sm">4</button>
+          <button type="button" onclick="calcInput('5')" class="bg-slate-100 hover:bg-slate-200 font-bold py-2.5 rounded-xl text-sm">5</button>
+          <button type="button" onclick="calcInput('6')" class="bg-slate-100 hover:bg-slate-200 font-bold py-2.5 rounded-xl text-sm">6</button>
+          <button type="button" onclick="calcInput('*')" class="bg-pink-100 text-pink-600 font-bold py-2.5 rounded-xl text-sm">×</button>
+          
+          <button type="button" onclick="calcInput('1')" class="bg-slate-100 hover:bg-slate-200 font-bold py-2.5 rounded-xl text-sm">1</button>
+          <button type="button" onclick="calcInput('2')" class="bg-slate-100 hover:bg-slate-200 font-bold py-2.5 rounded-xl text-sm">2</button>
+          <button type="button" onclick="calcInput('3')" class="bg-slate-100 hover:bg-slate-200 font-bold py-2.5 rounded-xl text-sm">3</button>
+          <button type="button" onclick="calcInput('-')" class="bg-pink-100 text-pink-600 font-bold py-2.5 rounded-xl text-sm">-</button>
+          
+          <button type="button" onclick="calcInput('C')" class="bg-rose-100 text-rose-600 font-bold py-2.5 rounded-xl text-sm">C</button>
+          <button type="button" onclick="calcInput('0')" class="bg-slate-100 hover:bg-slate-200 font-bold py-2.5 rounded-xl text-sm">0</button>
+          <button type="button" onclick="calcInput('=')" class="bg-emerald-100 text-emerald-600 font-bold py-2.5 rounded-xl text-sm">=</button>
+          <button type="button" onclick="calcInput('+')" class="bg-pink-100 text-pink-600 font-bold py-2.5 rounded-xl text-sm">+</button>
+        </div>
+
+        <button type="submit" class="w-full bg-pink-500 hover:bg-pink-600 text-white font-bold py-3 rounded-xl shadow-md transition-colors mt-2">
+          저장하기
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <!-- MODAL: 계좌 관리 모달 -->
+  <div id="accountModal" class="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
+    <div class="bg-white rounded-3xl w-full max-w-sm p-5 space-y-4 shadow-2xl">
+      <div class="flex justify-between items-center border-b border-pink-100 pb-2">
+        <h3 class="font-bold text-sm text-slate-800">계좌 편집 및 관리</h3>
+        <button onclick="closeModal('accountModal')" class="text-slate-400 p-1"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+      <div id="accountList" class="space-y-2 max-h-48 overflow-y-auto hide-scrollbar"></div>
+      <div class="pt-2 border-t border-pink-100 space-y-2">
+        <input type="text" id="newAccountName" placeholder="새 계좌 이름 (예: 카카오뱅크)" class="w-full border border-pink-200 rounded-xl px-3 py-2 text-xs">
+        <select id="newAccountType" class="w-full border border-pink-200 rounded-xl px-3 py-2 text-xs">
+          <option value="general">일반 계좌 (현금/입출금)</option>
+          <option value="stock">주식 계좌 (투자)</option>
+        </select>
+        <button onclick="addAccount()" class="w-full bg-pink-500 text-white font-bold py-2 rounded-xl text-xs">계좌 추가</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: 카테고리 관리 모달 -->
+  <div id="categoryModal" class="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
+    <div class="bg-white rounded-3xl w-full max-w-sm p-5 space-y-4 shadow-2xl">
+      <div class="flex justify-between items-center border-b border-pink-100 pb-2">
+        <h3 class="font-bold text-sm text-slate-800">카테고리 편집</h3>
+        <button onclick="closeModal('categoryModal')" class="text-slate-400 p-1"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+      <div id="categoryManageList" class="space-y-2 max-h-48 overflow-y-auto hide-scrollbar"></div>
+      <div class="pt-2 border-t border-pink-100 space-y-2">
+        <div class="flex gap-2">
+          <input type="text" id="newCategoryName" placeholder="새 카테고리명" class="flex-1 border border-pink-200 rounded-xl px-3 py-2 text-xs">
+          <select id="newCategoryType" class="border border-pink-200 rounded-xl px-2 py-2 text-xs">
+            <option value="expense">지출</option>
+            <option value="income">수입</option>
+          </select>
+        </div>
+        <button onclick="addCategory()" class="w-full bg-pink-500 text-white font-bold py-2 rounded-xl text-xs">카테고리 추가</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: API 키 입력 모달 -->
+  <div id="apiKeyModal" class="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
+    <div class="bg-white rounded-3xl w-full max-w-sm p-5 space-y-3 shadow-2xl">
+      <h3 class="font-bold text-sm text-slate-800">Gemini API 키 설정</h3>
+      <p class="text-xs text-slate-500">AI 분석 및 카테고리 자동 추천에 사용됩니다.</p>
+      <input type="password" id="apiKeyInput" placeholder="AI API Key 입력" class="w-full border border-pink-200 rounded-xl px-3 py-2 text-xs">
+      <div class="flex gap-2">
+        <button onclick="saveApiKey()" class="flex-1 bg-pink-500 text-white py-2 rounded-xl text-xs font-bold">저장</button>
+        <button onclick="closeModal('apiKeyModal')" class="flex-1 bg-slate-100 text-slate-600 py-2 rounded-xl text-xs font-bold">취소</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // --- STATE MANAGEMENT ---
+    let state = {
+      apiKey: 'Ab8RN6IIC9fJyvtmE3x2CI2bA7maOQSYyjtou1CWt-CxHVupxw',
+      budget: 2000000,
+      currentYear: 2026,
+      currentMonth: 11,
+      accounts: [
+        { id: 'acc1', name: '일반 계좌 (주거래)', type: 'general', balance: 3500000 },
+        { id: 'acc2', name: '비상금 통장', type: 'general', balance: 1200000 },
+        { id: 'acc3', name: '주식 계좌 (키움)', type: 'stock', balance: 5000000 }
+      ],
+      categories: [
+        { id: 'c1', name: '식비/카페', type: 'expense' },
+        { id: 'c2', name: '교통/통신', type: 'expense' },
+        { id: 'c3', name: '주거/공과금', type: 'expense' },
+        { id: 'c4', name: '쇼핑/취미', type: 'expense' },
+        { id: 'c5', name: '주식/투자', type: 'expense' },
+        { id: 'c6', name: '월급/수입', type: 'income' },
+        { id: 'c7', name: '용돈/부수입', type: 'income' }
+      ],
+      transactions: [
+        { id: 't1', date: '2026-11-01', type: 'income', accountId: 'acc1', category: '월급/수입', title: '11월 급여', amount: 3200000 },
+        { id: 't2', date: '2026-11-02', type: 'expense', accountId: 'acc1', category: '식비/카페', title: '스타벅스 커피', amount: 5500 },
+        { id: 't3', date: '2026-11-03', type: 'expense', accountId: 'acc1', category: '교통/통신', title: '지하철 교통카드', amount: 1400 },
+        { id: 't4', date: '2026-11-04', type: 'expense', accountId: 'acc3', category: '주식/투자', title: '주식 매수', amount: 500000 }
+      ]
+    };
+
+    let calcExpression = '';
+    let trendChartInstance = null;
+    let pieChartInstance = null;
+
+    // --- INITIALIZATION ---
+    window.addEventListener('DOMContentLoaded', () => {
+      loadLocalStorage();
+      initPickers();
+      renderAll();
+      setupSwipeEvents();
+    });
+
+    function loadLocalStorage() {
+      const saved = localStorage.getItem('pink_budget_data');
+      if (saved) {
+        try { state = { ...state, ...JSON.parse(saved) }; } catch(e){}
+      }
     }
 
-    // 별표 토글 함수
-    function toggleStar(event, id) {
-      event.stopPropagation(); // 카드 클릭 시 사이트 이동 방지
-      if (starredIds.has(id)) {
-        starredIds.delete(id);
-      } else {
-        starredIds.add(id);
+    function saveLocalStorage() {
+      localStorage.setItem('pink_budget_data', JSON.stringify(state));
+    }
+
+    function renderAll() {
+      renderBalances();
+      renderCalendar();
+      renderStackTimeline();
+      renderPeriodStats();
+      renderCharts();
+      saveLocalStorage();
+    }
+
+    // --- 1. BALANCES & BUDGET (주식 자산 분리 합산) ---
+    function renderBalances() {
+      // 일반 계좌만 합산 (주식 제외)
+      const generalTotal = state.accounts
+        .filter(a => a.type === 'general')
+        .reduce((sum, a) => sum + Number(a.balance), 0);
+      
+      const stockTotal = state.accounts
+        .filter(a => a.type === 'stock')
+        .reduce((sum, a) => sum + Number(a.balance), 0);
+
+      document.getElementById('totalBalance').innerText = `₩${generalTotal.toLocaleString()}`;
+      document.getElementById('generalBalance').innerText = `₩${generalTotal.toLocaleString()}`;
+      document.getElementById('stockBalance').innerText = `₩${stockTotal.toLocaleString()}`;
+
+      // 이번 달 수입/지출
+      const currentMonthStr = `${state.currentYear}-${String(state.currentMonth).padStart(2, '0')}`;
+      const monthTx = state.transactions.filter(t => t.date.startsWith(currentMonthStr));
+      
+      const monthInc = monthTx.filter(t => t.type === 'income').reduce((sum, t) => sum + Number(t.amount), 0);
+      const monthExp = monthTx.filter(t => t.type === 'expense').reduce((sum, t) => sum + Number(t.amount), 0);
+
+      document.getElementById('monthIncome').innerText = `+ ₩${monthInc.toLocaleString()}`;
+      document.getElementById('monthExpense').innerText = `- ₩${monthExp.toLocaleString()}`;
+
+      // 목표 예산 바
+      document.getElementById('budgetText').innerText = `₩${monthExp.toLocaleString()} / ₩${Number(state.budget).toLocaleString()}`;
+      const pct = Math.min(100, Math.round((monthExp / (state.budget || 1)) * 100));
+      document.getElementById('budgetBar').style.width = `${pct}%`;
+      document.getElementById('budgetInput').value = state.budget;
+    }
+
+    // --- 2. CALENDAR (알약 배지 디자인 & 스와이프 연동) ---
+    function initPickers() {
+      const yp = document.getElementById('yearPicker');
+      const mp = document.getElementById('monthPicker');
+      yp.innerHTML = ''; mp.innerHTML = '';
+      
+      for(let y = 2020; y <= 2030; y++) {
+        yp.innerHTML += `<option value="${y}" ${y === state.currentYear ? 'selected':''}>${y}년</option>`;
       }
+      for(let m = 1; m <= 12; m++) {
+        mp.innerHTML += `<option value="${m}" ${m === state.currentMonth ? 'selected':''}>${m}월</option>`;
+      }
+    }
+
+    function onPickerChange() {
+      state.currentYear = parseInt(document.getElementById('yearPicker').value);
+      state.currentMonth = parseInt(document.getElementById('monthPicker').value);
       renderAll();
     }
 
-    // 화면 종합 랜더링
-    function renderAll() {
-      const filtered = getFilteredPolicies();
+    function changeMonth(delta) {
+      state.currentMonth += delta;
+      if (state.currentMonth > 12) { state.currentMonth = 1; state.currentYear++; }
+      if (state.currentMonth < 1) { state.currentMonth = 12; state.currentYear--; }
+      initPickers();
+      renderAll();
+    }
 
-      // A. 별표(즐겨찾기) 정책
-      const starredGrid = document.getElementById('starred-grid');
-      const starredList = filtered.filter(p => starredIds.has(p.id));
-      starredGrid.innerHTML = starredList.length === 0
-        ? `<p class="empty-msg">오른쪽 위 별표(★)를 눌러 관심 있는 정책을 보관하세요.</p>`
-        : starredList.map(p => createCard(p)).join('');
+    function renderCalendar() {
+      document.getElementById('currentMonthLabel').innerText = `${state.currentYear}년 ${state.currentMonth}월`;
+      const grid = document.getElementById('calendarGrid');
+      grid.innerHTML = '';
 
-      // B. 신청 예정 정책
-      const upcomingGrid = document.getElementById('upcoming-grid');
-      const upcomingList = filtered.filter(p => p.startDate > todayStr || p.status === 'upcoming');
-      upcomingGrid.innerHTML = upcomingList.length === 0
-        ? `<p class="empty-msg">현재 검색 조건에 해당하는 예정 정책이 없습니다.</p>`
-        : upcomingList.map(p => createCard(p)).join('');
+      const firstDay = new Date(state.currentYear, state.currentMonth - 1, 1).getDay();
+      const lastDate = new Date(state.currentYear, state.currentMonth, 0).getDate();
 
-      // C. 카테고리(섹터)별 정책
-      const ongoingList = filtered.filter(p => p.startDate <= todayStr && p.status === 'ongoing');
-      const categories = ["주거/월세", "서민금융/자산", "취업/창업", "대학생", "군인", "소상공인/자영업", "문화/교통"];
-      const categorySection = document.getElementById('category-section');
+      // 빈 칸
+      for(let i=0; i<firstDay; i++) {
+        grid.innerHTML += `<div class="h-14"></div>`;
+      }
 
-      let categoryHtml = '';
-      categories.forEach(cat => {
-        const catPolicies = ongoingList.filter(p => p.category === cat);
-        categoryHtml += `
-          <h2 class="section-title">📌 ${cat} 지원 정책</h2>
-          <div class="policy-grid">
-            ${catPolicies.length === 0 
-              ? `<p class="empty-msg">해당 조건에 해당하는 진행 중인 정책이 없습니다.</p>`
-              : catPolicies.map(p => createCard(p)).join('')}
+      const currentMonthStr = `${state.currentYear}-${String(state.currentMonth).padStart(2, '0')}`;
+
+      for(let d=1; d<=lastDate; d++) {
+        const dateStr = `${currentMonthStr}-${String(d).padStart(2, '0')}`;
+        const dayTx = state.transactions.filter(t => t.date === dateStr);
+        
+        const inc = dayTx.filter(t => t.type === 'income').reduce((s, t) => s + Number(t.amount), 0);
+        const exp = dayTx.filter(t => t.type === 'expense').reduce((s, t) => s + Number(t.amount), 0);
+
+        grid.innerHTML += `
+          <div class="h-14 p-1 rounded-xl bg-pink-50/40 border border-pink-100/50 flex flex-col justify-between items-center">
+            <span class="font-bold text-[11px] text-slate-700">${d}</span>
+            <div class="w-full space-y-0.5">
+              ${inc > 0 ? `<div class="bg-emerald-100 text-emerald-700 text-[9px] font-bold rounded-full px-1 py-0.2 truncate">+${Math.round(inc/1000)}k</div>` : ''}
+              ${exp > 0 ? `<div class="bg-rose-100 text-rose-700 text-[9px] font-bold rounded-full px-1 py-0.2 truncate">-${Math.round(exp/1000)}k</div>` : ''}
+            </div>
+          </div>
+        `;
+      }
+    }
+
+    // --- 3. DUAL-COLUMN STACK TIMELINE ---
+    function renderStackTimeline() {
+      const container = document.getElementById('stackTimeline');
+      container.innerHTML = '';
+
+      const currentMonthStr = `${state.currentYear}-${String(state.currentMonth).padStart(2, '0')}`;
+      const monthTx = state.transactions.filter(t => t.date.startsWith(currentMonthStr));
+
+      // 날짜별 그룹핑
+      const grouped = {};
+      monthTx.forEach(t => {
+        if (!grouped[t.date]) grouped[t.date] = [];
+        grouped[t.date].push(t);
+      });
+
+      const dates = Object.keys(grouped).sort((a,b) => b.localeCompare(a));
+
+      if (dates.length === 0) {
+        container.innerHTML = `<div class="text-center text-xs text-slate-400 py-8">이 달의 수입/지출 내역이 없습니다.</div>`;
+        return;
+      }
+
+      const daysOfWeek = ['일', '월', '화', '수', '목', '금', '토'];
+
+      dates.forEach(date => {
+        const dObj = new Date(date);
+        const dateLabel = `${dObj.getMonth()+1}월 ${dObj.getDate()}일 (${daysOfWeek[dObj.getDay()]})`;
+
+        const dayTx = grouped[date];
+        const incomes = dayTx.filter(t => t.type === 'income');
+        const expenses = dayTx.filter(t => t.type === 'expense');
+
+        let html = `
+          <div>
+            <div class="flex items-center gap-2 mb-2">
+              <span class="text-xs font-bold text-pink-600 whitespace-nowrap">${dateLabel}</span>
+              <div class="h-[1px] bg-pink-200 flex-1"></div>
+            </div>
+            <div class="grid grid-cols-2 gap-2 text-xs">
+              <!-- 수입 스택 (좌) -->
+              <div class="space-y-1.5">
+        `;
+
+        incomes.forEach(t => {
+          html += `
+            <div class="bg-emerald-50/80 border border-emerald-100 rounded-xl p-2 relative group">
+              <div class="flex justify-between items-start">
+                <span class="text-[10px] font-bold text-emerald-600 bg-emerald-100 px-1.5 py-0.5 rounded-md">${t.category}</span>
+                <button onclick="deleteTx('${t.id}')" class="text-slate-300 hover:text-rose-500 text-xs"><i class="fa-solid fa-xmark"></i></button>
+              </div>
+              <div class="font-bold text-slate-700 mt-1 truncate">${t.title}</div>
+              <div class="font-black text-emerald-600 text-right mt-0.5 truncate">+₩${Number(t.amount).toLocaleString()}</div>
+            </div>
+          `;
+        });
+
+        html += `</div><!-- 지출 스택 (우) --><div class="space-y-1.5">`;
+
+        expenses.forEach(t => {
+          html += `
+            <div class="bg-rose-50/80 border border-rose-100 rounded-xl p-2 relative group">
+              <div class="flex justify-between items-start">
+                <span class="text-[10px] font-bold text-rose-600 bg-rose-100 px-1.5 py-0.5 rounded-md">${t.category}</span>
+                <button onclick="deleteTx('${t.id}')" class="text-slate-300 hover:text-rose-500 text-xs"><i class="fa-solid fa-xmark"></i></button>
+              </div>
+              <div class="font-bold text-slate-700 mt-1 truncate">${t.title}</div>
+              <div class="font-black text-rose-600 text-right mt-0.5 truncate">-₩${Number(t.amount).toLocaleString()}</div>
+            </div>
+          `;
+        });
+
+        html += `</div></div></div>`;
+        container.innerHTML += html;
+      });
+    }
+
+    // --- 4. PERIOD STATS (박스 글자 넘침 방지) ---
+    function renderPeriodStats() {
+      const currentMonthStr = `${state.currentYear}-${String(state.currentMonth).padStart(2, '0')}`;
+      const monthTx = state.transactions.filter(t => t.date.startsWith(currentMonthStr));
+      
+      const monthInc = monthTx.filter(t => t.type === 'income').reduce((s, t) => s + Number(t.amount), 0);
+      const monthExp = monthTx.filter(t => t.type === 'expense').reduce((s, t) => s + Number(t.amount), 0);
+
+      const daysInMonth = new Date(state.currentYear, state.currentMonth, 0).getDate();
+      const dailyAvg = Math.round(monthExp / daysInMonth);
+      const netIncome = monthInc - monthExp;
+
+      const yearStr = `${state.currentYear}-`;
+      const yearExp = state.transactions
+        .filter(t => t.date.startsWith(yearStr) && t.type === 'expense')
+        .reduce((s, t) => s + Number(t.amount), 0);
+
+      document.getElementById('statDailyAvg').innerText = `₩${dailyAvg.toLocaleString()}`;
+      document.getElementById('statNetIncome').innerText = `${netIncome >= 0 ? '+' : ''}₩${netIncome.toLocaleString()}`;
+      document.getElementById('statYearlyExpense').innerText = `₩${yearExp.toLocaleString()}`;
+    }
+
+    // --- 5. CHARTS & TAB 2 ---
+    function switchTab(tab) {
+      const main = document.getElementById('tabMain');
+      const chart = document.getElementById('tabChart');
+      const btnMain = document.getElementById('tabBtnMain');
+      const btnChart = document.getElementById('tabBtnChart');
+
+      if (tab === 'main') {
+        main.classList.remove('hidden');
+        chart.classList.add('hidden');
+        btnMain.className = "flex-1 py-3 text-center text-sm font-bold text-pink-600 border-b-2 border-pink-500 transition-colors";
+        btnChart.className = "flex-1 py-3 text-center text-sm font-bold text-slate-400 border-b-2 border-transparent transition-colors";
+      } else {
+        main.classList.add('hidden');
+        chart.classList.remove('hidden');
+        btnChart.className = "flex-1 py-3 text-center text-sm font-bold text-pink-600 border-b-2 border-pink-500 transition-colors";
+        btnMain.className = "flex-1 py-3 text-center text-sm font-bold text-slate-400 border-b-2 border-transparent transition-colors";
+        renderCharts();
+      }
+    }
+
+    function renderCharts() {
+      // 월별 트렌드 차트
+      const ctxTrend = document.getElementById('monthlyTrendChart').getContext('2d');
+      const months = [1,2,3,4,5,6,7,8,9,10,11,12];
+      const monthlyData = months.map(m => {
+        const mStr = `${state.currentYear}-${String(m).padStart(2, '0')}`;
+        return state.transactions
+          .filter(t => t.date.startsWith(mStr) && t.type === 'expense')
+          .reduce((s, t) => s + Number(t.amount), 0);
+      });
+
+      if (trendChartInstance) trendChartInstance.destroy();
+      trendChartInstance = new Chart(ctxTrend, {
+        type: 'line',
+        data: {
+          labels: months.map(m => `${m}월`),
+          datasets: [{
+            label: '지출',
+            data: monthlyData,
+            borderColor: '#ff758c',
+            backgroundColor: 'rgba(255, 117, 140, 0.1)',
+            fill: true,
+            tension: 0.3
+          }]
+        },
+        options: { responsive: true, maintainAspectRatio: false }
+      });
+
+      // 카테고리 랭킹 차트
+      const ctxPie = document.getElementById('categoryPieChart').getContext('2d');
+      const currentMonthStr = `${state.currentYear}-${String(state.currentMonth).padStart(2, '0')}`;
+      const monthExpTx = state.transactions.filter(t => t.date.startsWith(currentMonthStr) && t.type === 'expense');
+
+      const catMap = {};
+      monthExpTx.forEach(t => {
+        catMap[t.category] = (catMap[t.category] || 0) + Number(t.amount);
+      });
+
+      const sortedCat = Object.keys(catMap).sort((a,b) => catMap[b] - catMap[a]);
+      const pieData = sortedCat.map(c => catMap[c]);
+
+      if (pieChartInstance) pieChartInstance.destroy();
+      pieChartInstance = new Chart(ctxPie, {
+        type: 'doughnut',
+        data: {
+          labels: sortedCat,
+          datasets: [{
+            data: pieData.length ? pieData : [1],
+            backgroundColor: ['#ff758c', '#ff7eb3', '#ffb3c1', '#f72585', '#7209b7', '#4cc9f0']
+          }]
+        },
+        options: { responsive: true, maintainAspectRatio: false }
+      });
+
+      // 랭킹 리스트 표기
+      const rankingList = document.getElementById('categoryRankingList');
+      rankingList.innerHTML = '';
+      sortedCat.forEach((cat, idx) => {
+        rankingList.innerHTML += `
+          <div class="flex justify-between items-center text-xs">
+            <span class="font-bold text-slate-700">${idx + 1}. ${cat}</span>
+            <span class="font-extrabold text-pink-600">₩${catMap[cat].toLocaleString()}</span>
           </div>
         `;
       });
-
-      categorySection.innerHTML = categoryHtml;
     }
 
-    // 초기화
-    window.onload = () => {
+    // --- 6. TOUCH SWIPE CONTROLLER (이중 영역 완전 분리) ---
+    function setupSwipeEvents() {
+      // 1) 달력 영역 전용 스와이프 (달력 넘기기)
+      const calArea = document.getElementById('calendarSwipeArea');
+      let calStartX = 0, calStartY = 0;
+
+      calArea.addEventListener('touchstart', (e) => {
+        calStartX = e.touches[0].clientX;
+        calStartY = e.touches[0].clientY;
+      }, { passive: true });
+
+      calArea.addEventListener('touchend', (e) => {
+        const diffX = e.changedTouches[0].clientX - calStartX;
+        const diffY = e.changedTouches[0].clientY - calStartY;
+
+        if (Math.abs(diffX) > 40 && Math.abs(diffX) > Math.abs(diffY)) {
+          if (diffX > 0) changeMonth(-1); // 이전달
+          else changeMonth(1);           // 다음달
+        }
+      }, { passive: true });
+
+      // 2) 전체 메인 영역 스와이프 (달력 외 영역에서 탭 전환)
+      const mainArea = document.getElementById('swipeContainer');
+      let mainStartX = 0, mainStartY = 0;
+
+      mainArea.addEventListener('touchstart', (e) => {
+        // 달력 내부 터치면 전체 스와이프 탭 전환 동작 생략
+        if (calArea.contains(e.target)) return;
+        mainStartX = e.touches[0].clientX;
+        mainStartY = e.touches[0].clientY;
+      }, { passive: true });
+
+      mainArea.addEventListener('touchend', (e) => {
+        if (calArea.contains(e.target)) return;
+        const diffX = e.changedTouches[0].clientX - mainStartX;
+        const diffY = e.changedTouches[0].clientY - mainStartY;
+
+        if (Math.abs(diffX) > 50 && Math.abs(diffX) > Math.abs(diffY)) {
+          if (diffX < 0) switchTab('chart'); // 오른쪽에서 왼쪽 스와이프 -> 차트 탭
+          else switchTab('main');           // 왼쪽에서 오른쪽 스와이프 -> 메인 탭
+        }
+      }, { passive: true });
+    }
+
+    // --- 7. MODAL & INPUT & CALCULATOR KEYPAD ---
+    function openModal(id) {
+      document.getElementById(id).classList.remove('hidden');
+      if (id === 'accountModal') renderAccountManageList();
+      if (id === 'categoryModal') renderCategoryManageList();
+    }
+
+    function closeModal(id) {
+      document.getElementById(id).classList.add('hidden');
+    }
+
+    function openTransactionModal(type) {
+      document.getElementById('txType').value = type;
+      document.getElementById('modalTitle').innerText = type === 'income' ? '수입 내역 작성' : '지출 내역 작성';
+      
+      const today = new Date().toISOString().split('T')[0];
+      document.getElementById('txDate').value = today;
+
+      // 계좌 셀렉트
+      const accSelect = document.getElementById('txAccount');
+      accSelect.innerHTML = '';
+      state.accounts.forEach(a => {
+        accSelect.innerHTML += `<option value="${a.id}">${a.name} (${a.type==='stock'?'주식':'일반'})</option>`;
+      });
+
+      // 카테고리 셀렉트
+      const catSelect = document.getElementById('txCategory');
+      catSelect.innerHTML = '';
+      state.categories.filter(c => c.type === type).forEach(c => {
+        catSelect.innerHTML += `<option value="${c.name}">${c.name}</option>`;
+      });
+
+      calcExpression = '';
+      document.getElementById('txAmount').value = '0';
+      document.getElementById('txTitle').value = '';
+
+      openModal('transactionModal');
+    }
+
+    function calcInput(val) {
+      const amountInput = document.getElementById('txAmount');
+      if (val === 'C') {
+        calcExpression = '';
+        amountInput.value = '0';
+      } else if (val === '=') {
+        try {
+          calcExpression = String(eval(calcExpression) || 0);
+          amountInput.value = Number(calcExpression).toLocaleString();
+        } catch(e) {
+          amountInput.value = '오류';
+          calcExpression = '';
+        }
+      } else {
+        calcExpression += val;
+        amountInput.value = calcExpression;
+      }
+    }
+
+    function handleTxSubmit(e) {
+      e.preventDefault();
+      const type = document.getElementById('txType').value;
+      const date = document.getElementById('txDate').value;
+      const accountId = document.getElementById('txAccount').value;
+      const title = document.getElementById('txTitle').value;
+      const category = document.getElementById('txCategory').value;
+      
+      let amount = 0;
+      try { amount = Number(eval(calcExpression || document.getElementById('txAmount').value.replace(/,/g, ''))); } catch(err){}
+
+      if (!amount || isNaN(amount)) return alert('올바른 금액을 입력하세요.');
+
+      const newTx = { id: 't_' + Date.now(), date, type, accountId, category, title, amount };
+      state.transactions.push(newTx);
+
+      // 계좌 잔액 업데이트
+      const acc = state.accounts.find(a => a.id === accountId);
+      if (acc) {
+        if (type === 'income') acc.balance += amount;
+        else acc.balance -= amount;
+      }
+
+      closeModal('transactionModal');
       renderAll();
-    };
+    }
+
+    function deleteTx(id) {
+      const tx = state.transactions.find(t => t.id === id);
+      if (!tx) return;
+
+      const acc = state.accounts.find(a => a.id === tx.accountId);
+      if (acc) {
+        if (tx.type === 'income') acc.balance -= tx.amount;
+        else acc.balance += tx.amount;
+      }
+
+      state.transactions = state.transactions.filter(t => t.id !== id);
+      renderAll();
+    }
+
+    // --- 8. ACCOUNTS & CATEGORIES EDIT ---
+    function renderAccountManageList() {
+      const list = document.getElementById('accountList');
+      list.innerHTML = '';
+      state.accounts.forEach(a => {
+        list.innerHTML += `
+          <div class="flex justify-between items-center text-xs p-2 bg-pink-50/50 rounded-xl">
+            <span class="font-bold">${a.name} <span class="text-[10px] text-pink-400">(${a.type==='stock'?'주식':'일반'})</span></span>
+            <div class="flex items-center gap-2">
+              <span class="font-bold text-slate-700">₩${Number(a.balance).toLocaleString()}</span>
+              <button onclick="deleteAccount('${a.id}')" class="text-rose-400 hover:text-rose-600"><i class="fa-solid fa-trash"></i></button>
+            </div>
+          </div>
+        `;
+      });
+    }
+
+    function addAccount() {
+      const name = document.getElementById('newAccountName').value;
+      const type = document.getElementById('newAccountType').value;
+      if (!name) return;
+      state.accounts.push({ id: 'acc_' + Date.now(), name, type, balance: 0 });
+      document.getElementById('newAccountName').value = '';
+      renderAccountManageList();
+      renderAll();
+    }
+
+    function deleteAccount(id) {
+      state.accounts = state.accounts.filter(a => a.id !== id);
+      renderAccountManageList();
+      renderAll();
+    }
+
+    function renderCategoryManageList() {
+      const list = document.getElementById('categoryManageList');
+      list.innerHTML = '';
+      state.categories.forEach(c => {
+        list.innerHTML += `
+          <div class="flex justify-between items-center text-xs p-2 bg-pink-50/50 rounded-xl">
+            <span class="font-bold">${c.name} <span class="text-[10px] text-pink-400">(${c.type==='expense'?'지출':'수입'})</span></span>
+            <button onclick="deleteCategory('${c.id}')" class="text-rose-400 hover:text-rose-600"><i class="fa-solid fa-trash"></i></button>
+          </div>
+        `;
+      });
+    }
+
+    function addCategory() {
+      const name = document.getElementById('newCategoryName').value;
+      const type = document.getElementById('newCategoryType').value;
+      if (!name) return;
+      state.categories.push({ id: 'c_' + Date.now(), name, type });
+      document.getElementById('newCategoryName').value = '';
+      renderCategoryManageList();
+    }
+
+    function deleteCategory(id) {
+      state.categories = state.categories.filter(c => c.id !== id);
+      renderCategoryManageList();
+    }
+
+    function saveBudget() {
+      state.budget = Number(document.getElementById('budgetInput').value) || 0;
+      renderBalances();
+      alert('목표 예산이 저장되었습니다.');
+    }
+
+    // --- 9. AI INTEGRATION & CSV EXPORT ---
+    function saveApiKey() {
+      state.apiKey = document.getElementById('apiKeyInput').value;
+      saveLocalStorage();
+      closeModal('apiKeyModal');
+      alert('API 키가 저장되었습니다.');
+    }
+
+    async function autoSuggestCategory() {
+      const title = document.getElementById('txTitle').value;
+      if (!title) return alert('상세 명칭을 입력해 주세요.');
+      
+      const cats = state.categories.map(c => c.name).join(', ');
+      try {
+        const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${state.apiKey}`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            contents: [{ parts: [{ text: `"${title}"의 사용처/출처를 보고 다음 카테고리 목록중 하나만 단어로 추천해줘: [${cats}]` }] }]
+          })
+        });
+        const data = await res.json();
+        const recommended = data.candidates[0].content.parts[0].text.trim();
+        const select = document.getElementById('txCategory');
+        for (let opt of select.options) {
+          if (opt.value.includes(recommended) || recommended.includes(opt.value)) {
+            select.value = opt.value;
+            break;
+          }
+        }
+      } catch(e) {
+        alert('AI 카테고리 추천 실패');
+      }
+    }
+
+    async function runAiAnalysis() {
+      const box = document.getElementById('aiResultBox');
+      box.classList.remove('hidden');
+      box.innerText = 'Gemini AI가 소비 패턴을 분석 중입니다...';
+
+      const currentMonthStr = `${state.currentYear}-${String(state.currentMonth).padStart(2, '0')}`;
+      const monthTx = state.transactions.filter(t => t.date.startsWith(currentMonthStr));
+
+      try {
+        const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${state.apiKey}`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            contents: [{ parts: [{ text: `다음 가계부 지출 데이터(${state.currentYear}년 ${state.currentMonth}월)를 분석하여 소비 피드백 및 조언을 3줄로 한국어로 작성해줘:\n${JSON.stringify(monthTx)}` }] }]
+          })
+        });
+        const data = await res.json();
+        box.innerText = data.candidates[0].content.parts[0].text;
+      } catch(e) {
+        box.innerText = 'AI 분석을 실행할 수 없습니다. API 키를 확인하세요.';
+      }
+    }
+
+    function exportCSV(monthOnly = false) {
+      let txList = state.transactions;
+      if (monthOnly) {
+        const currentMonthStr = `${state.currentYear}-${String(state.currentMonth).padStart(2, '0')}`;
+        txList = txList.filter(t => t.date.startsWith(currentMonthStr));
+      }
+
+      let csv = '\uFEFF날짜,구분,카테고리,상세명칭,금액\n';
+      txList.forEach(t => {
+        csv += `${t.date},${t.type==='income'?'수입':'지출'},${t.category},${t.title},${t.amount}\n`;
+      });
+
+      const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+      const link = document.createElement('a');
+      link.href = URL.createObjectURL(blob);
+      link.download = monthOnly ? `가계부_${state.currentYear}_${state.currentMonth}월.csv` : `가계부_전체기록.csv`;
+      link.click();
+    }
   </script>
 </body>
 </html>
